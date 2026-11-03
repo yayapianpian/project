@@ -167,3 +167,84 @@ export async function resetAllData(db: DA180DB = defaultDb) {
     await Promise.all(db.tables.map((t) => t.clear()));
   });
 }
+
+// ───────────── 課程單元 ─────────────
+
+export interface LessonProgressRow {
+  lessonId: string;
+  status: 'read' | 'practiced' | 'passed';
+  readAt?: string;
+  bestQuizScore?: number;
+  lastQuizAt?: string;
+  [k: string]: unknown;
+}
+
+/** 把對應這個單元的每日任務標成完成（只影響進度，不影響能力分數） */
+async function completeTasksForLesson(lessonId: string, type: 'lesson' | 'practice' | 'quiz', db: DA180DB) {
+  const { lessonsForTask } = await import('../content/lessons');
+  const days = await db.planDays.toArray();
+  const now = new Date().toISOString();
+  for (const d of days) {
+    let changed = false;
+    const tasks = d.tasks.map((t) => {
+      if (t.status === 'done' || t.type !== type) return t;
+      const hit = type === 'quiz' ? t.moduleId === lessonId.replace(/-\d+$/, '') && isLastLessonOfModule(lessonId) : lessonsForTask(t).some((l) => l.id === lessonId);
+      if (!hit) return t;
+      changed = true;
+      return { ...t, status: 'done' as const, completedAt: now, updatedAt: now };
+    });
+    if (changed) await db.planDays.put({ ...d, tasks });
+  }
+}
+
+function isLastLessonOfModule(lessonId: string): boolean {
+  // 模組的單元測驗任務在最後一天，對應最後一個單元的小測
+  const m = lessonId.match(/^(.*)-(\d+)$/);
+  if (!m) return false;
+  return lastLessonIndex[m[1]] === Number(m[2]);
+}
+const lastLessonIndex: Record<string, number> = {};
+export function registerModuleLessonCount(moduleId: string, count: number) {
+  lastLessonIndex[moduleId] = count;
+}
+
+export async function markLessonRead(lessonId: string, db: DA180DB = defaultDb) {
+  const existing = (await db.lessonProgress.get(lessonId)) as LessonProgressRow | undefined;
+  if (!existing) await db.lessonProgress.put({ lessonId, status: 'read', readAt: new Date().toISOString() });
+  await completeTasksForLesson(lessonId, 'lesson', db);
+}
+
+export async function markLessonPracticed(lessonId: string, db: DA180DB = defaultDb) {
+  const existing = (await db.lessonProgress.get(lessonId)) as LessonProgressRow | undefined;
+  if (!existing || existing.status === 'read') {
+    await db.lessonProgress.put({ ...(existing ?? { lessonId, readAt: new Date().toISOString() }), lessonId, status: 'practiced' });
+  }
+  await completeTasksForLesson(lessonId, 'practice', db);
+}
+
+export async function submitLessonQuiz(
+  lessonId: string,
+  items: Omit<Attempt, 'id' | 'context' | 'sessionId'>[],
+  startedAt: string,
+  db: DA180DB = defaultDb,
+): Promise<{ sessionId: string; score: number }> {
+  const sessionId = uid('quiz');
+  const score = items.length ? Math.round((items.reduce((s, a) => s + a.scoreRatio, 0) / items.length) * 100) : 0;
+  await db.transaction('rw', [db.attempts, db.quizSessions, db.lessonProgress, db.conceptMastery, db.skillSnapshots, db.profile], async () => {
+    for (const a of items) await db.attempts.add({ ...a, context: 'quiz', sessionId } as Attempt);
+    await db.quizSessions.put({
+      id: sessionId, quizId: lessonId, mode: 'unit', questionIds: items.map((a) => a.questionId),
+      startedAt, endedAt: new Date().toISOString(), score, status: 'submitted',
+    });
+    const existing = (await db.lessonProgress.get(lessonId)) as LessonProgressRow | undefined;
+    const best = Math.max(score, existing?.bestQuizScore ?? 0);
+    await db.lessonProgress.put({
+      ...(existing ?? { readAt: new Date().toISOString() }), lessonId,
+      status: best >= 80 ? 'passed' : existing?.status === 'passed' ? 'passed' : 'practiced',
+      bestQuizScore: best, lastQuizAt: new Date().toISOString(),
+    });
+    await recomputeMastery(db);
+  });
+  if (score >= 80) await completeTasksForLesson(lessonId, 'quiz', db);
+  return { sessionId, score };
+}

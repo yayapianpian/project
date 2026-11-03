@@ -1,0 +1,121 @@
+{
+  "rawRows": 4120,
+  "duplicateRows": 40,
+  "testRows": 3,
+  "storeNameVariants": 69,
+  "cleanRows": 4077,
+  "totalRevenue": 1285453,
+  "northMarchRevenue": 273180,
+  "janRevenue": 437594,
+  "febRevenue": 406137,
+  "marRevenue": 441722,
+  "avgAmount": 315.29,
+  "medianAmount": 259,
+  "memberRate": 64.9,
+  "missingMember": 1432,
+  "rawMissingMember": 1441,
+  "rawStoreVariants": 70,
+  "rawStoreSpellings": 7,
+  "rawXinyiRows": 957,
+  "storeStats": {
+    "台北信義店": {
+      "revenue": 297507,
+      "orders": 946,
+      "aov": 314
+    },
+    "台北內湖店": {
+      "revenue": 228925,
+      "orders": 724,
+      "aov": 316
+    },
+    "新北板橋店": {
+      "revenue": 257064,
+      "orders": 821,
+      "aov": 313
+    },
+    "台中逢甲店": {
+      "revenue": 224426,
+      "orders": 699,
+      "aov": 321
+    },
+    "高雄夢時代店": {
+      "revenue": 277531,
+      "orders": 887,
+      "aov": 313
+    }
+  },
+  "storeMonth": {
+    "台北信義店": [
+      107341,
+      87910,
+      102256
+    ],
+    "台北內湖店": [
+      75829,
+      71722,
+      81374
+    ],
+    "新北板橋店": [
+      85956,
+      81558,
+      89550
+    ],
+    "台中逢甲店": [
+      75477,
+      69438,
+      79511
+    ],
+    "高雄夢時代店": [
+      92991,
+      95509,
+      89031
+    ]
+  },
+  "catMonth": {
+    "飲料": [
+      113691,
+      105507,
+      117015
+    ],
+    "日用品": [
+      88154,
+      82007,
+      94447
+    ],
+    "生鮮": [
+      176764,
+      151998,
+      164108
+    ],
+    "零食": [
+      58985,
+      66625,
+      66152
+    ]
+  },
+  "kaohsiungFreshByMonth": [
+    35805,
+    30667,
+    21959
+  ],
+  "salesPerPing": {
+    "台北信義店": 1653,
+    "台北內湖店": 1526,
+    "新北板橋店": 1607,
+    "台中逢甲店": 1603,
+    "高雄夢時代店": 1388
+  },
+  "stdevAmount": 247.54,
+  "p90Amount": 700,
+  "maxAmount": 1260,
+  "memberAov": 317,
+  "nonMemberAov": 313,
+  "freshShare": 38.3,
+  "ksMarchChangePct": -6.8,
+  "othersMarchChangePct": 13.5,
+  "ksFreshDrop": 8708,
+  "ksTotalDrop": 6478,
+  "qtyOver3": 408,
+  "bigOrders": 850,
+  "xinyiCoffeeQty": 135
+}

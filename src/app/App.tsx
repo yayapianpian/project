@@ -5,6 +5,7 @@ import { DashboardPage } from '../pages/Dashboard';
 import { DiagnosticPage } from '../pages/Diagnostic';
 import { RoadmapPage } from '../pages/Roadmap';
 import { LessonsPage } from '../pages/Lessons';
+import { LessonPage } from '../pages/Lesson';
 import { QuizPage } from '../pages/Quiz';
 import { TutorPage } from '../pages/Tutor';
 import { AbilitiesPage } from '../pages/Abilities';
@@ -26,6 +27,7 @@ export function App() {
           <Route path="/diagnostic" element={<DiagnosticPage />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/lessons" element={<LessonsPage />} />
+          <Route path="/lessons/:lessonId" element={<LessonPage />} />
           <Route path="/sql" element={<ComingSoon id="sql" />} />
           <Route path="/python" element={<ComingSoon id="python" />} />
           <Route path="/powerbi" element={<ComingSoon id="powerbi" />} />

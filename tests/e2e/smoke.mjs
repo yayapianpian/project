@@ -81,6 +81,46 @@ try {
   check(await page.evaluate(() => document.documentElement.classList.contains('dark')), '深色主題在重新整理後保留');
   await page.screenshot({ path: `${OUT}/dashboard-dark.png`, fullPage: true });
 
+  // 課程單元：閱讀 → 三段式引導練習 → 小測 → 任務自動打勾
+  await page.goto(BASE + '#/lessons/m1-mindset-1');
+  await page.getByRole('heading', { name: '數據分析師在企業裡做什麼' }).waitFor();
+  await page.getByRole('button', { name: '我讀完了' }).click();
+  await page.getByText('已標記為讀完').waitFor();
+  const p1 = page.locator('#practice .rounded-xl').first();
+  await p1.locator('label').nth(0).click();
+  await p1.getByRole('button', { name: '送出' }).click();
+  await p1.getByText('錯在哪：').waitFor();
+  check((await p1.getByText('圖表多不等於有價值').count()) === 1, '練習：第 1 次答錯指出錯在哪（選項專屬回饋）');
+  await p1.locator('label').nth(2).click();
+  await p1.getByRole('button', { name: '再試一次' }).click();
+  await p1.getByText('提示：').waitFor();
+  check(true, '練習：第 2 次答錯顯示解題提示');
+  await p1.locator('label').nth(3).click();
+  await p1.getByRole('button', { name: '再試一次' }).click();
+  await p1.getByText('正確答案：').waitFor();
+  check(true, '練習：第 3 次答錯顯示完整解答');
+  const p2 = page.locator('#practice .rounded-xl').nth(1);
+  await p2.locator('label').nth(0).click();
+  await p2.locator('label').nth(1).click();
+  await p2.getByRole('button', { name: '送出' }).click();
+  await p2.getByText('一次答對').waitFor();
+  check(true, '練習：答對後顯示解析');
+  const quiz = page.locator('#quiz');
+  const qs = quiz.locator('.rounded-xl');
+  await qs.nth(0).locator('label').nth(1).click();
+  await qs.nth(1).locator('label').nth(2).click();
+  await qs.nth(2).locator('label').nth(2).click();
+  await quiz.getByRole('button', { name: '交卷' }).click();
+  await quiz.getByText('100 分').waitFor();
+  check(true, '小測：交卷後顯示分數與解析');
+  await page.goto(BASE);
+  await page.getByText(/今日任務 · 第 1 天/).waitFor();
+  const boxes = page.getByRole('checkbox', { name: /標記「/ });
+  check(await boxes.nth(0).isChecked() && await boxes.nth(1).isChecked(), '完成單元後，每日任務自動打勾');
+  await page.goto(BASE + '#/quiz');
+  await page.getByText('單元小測').first().waitFor();
+  check(true, '小測成績出現在測驗紀錄');
+
   // 路線頁
   await page.goto(BASE + '#/roadmap');
   await page.getByText('第 1 個月：資料分析基礎').waitFor();
@@ -97,7 +137,7 @@ try {
   const backupPath = `${OUT}/backup.json`;
   await dl.saveAs(backupPath);
   const backup = JSON.parse(readFileSync(backupPath, 'utf8'));
-  check(backup.app === 'da180' && backup.stores.attempts.length === 30 && backup.stores.planDays.length === 180, '備份包含 30 筆作答與 180 天計畫');
+  check(backup.app === 'da180' && backup.stores.attempts.length === 35 && backup.stores.planDays.length === 180, '備份包含 35 筆作答（診斷 30 + 練習 2 + 小測 3）與 180 天計畫');
 
   await page.getByRole('button', { name: '清除所有資料…' }).click();
   await page.getByLabel('請輸入「清除」兩個字確認').fill('清除');
@@ -109,7 +149,7 @@ try {
 
   await page.goto(BASE + '#/settings');
   await page.locator('input[type=file]').setInputFiles(backupPath);
-  await page.getByText('作答紀錄 30 筆').waitFor();
+  await page.getByText('作答紀錄 35 筆').waitFor();
   const [, ] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: '覆寫並還原' }).click()]);
   await page.getByText('已還原備份').waitFor();
   await page.goto(BASE);
@@ -144,6 +184,13 @@ try {
   await m.goto(BASE);
   await m.getByText(/今日任務 · 第 1 天/).waitFor();
   await m.screenshot({ path: `${OUT}/dashboard-mobile.png`, fullPage: true });
+
+  // 手機版課程單元截圖
+  await m.goto(BASE + '#/lessons/m1-lookup-3');
+  await m.getByRole('heading', { name: /SUMIFS/ }).first().waitFor();
+  const lessonOverflow = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  check(lessonOverflow <= 0, `手機版課程單元沒有水平捲動（溢出 ${lessonOverflow}px）`);
+  await m.screenshot({ path: `${OUT}/lesson-mobile.png`, fullPage: true });
 
   check(errors.length === 0, '沒有任何頁面錯誤' + (errors.length ? '\n' + errors.join('\n') : ''));
   console.log('\n全部驗收通過');

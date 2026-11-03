@@ -74,3 +74,40 @@ export interface Phase {
   title: string;
   practice: string;
 }
+
+/** 課程中的練習題與小測題：多了三段式引導需要的內容 */
+export interface LessonQuestion extends ObjectiveQuestion {
+  /** 第二段：解題方向提示（不含答案） */
+  hint: string;
+  /** 第一段（選擇題）：選了某個錯誤選項時，指出錯在哪 */
+  feedback?: Record<string, string>;
+  /** 第一段（填空題）：答錯時指出錯在哪 */
+  wrongHint?: string;
+}
+
+export interface LessonExample {
+  title: string;
+  code: string;
+  lang: 'sql' | 'python' | 'formula' | 'text';
+  /** 執行結果或說明 */
+  result?: string;
+}
+
+export interface Lesson {
+  id: string;
+  moduleId: string;
+  /** 對應模組 topics 的索引 */
+  topicIndex: number;
+  title: string;
+  /** 這個技能在工作上用在哪裡 */
+  workUseCase: string;
+  /** 教學內容（簡易 Markdown：## 標題、- 清單、1. 清單、```程式碼```、| 表格 |、**粗體**、`程式碼`） */
+  body: string;
+  steps: string[];
+  examples: LessonExample[];
+  practice: LessonQuestion[];
+  commonMistakes: string[];
+  quiz: LessonQuestion[];
+  /** 需要下載的資料集 */
+  datasets?: { title: string; file: string }[];
+}

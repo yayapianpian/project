@@ -10,6 +10,7 @@ import { CONCEPT_BY_ID } from '../content/concepts';
 import { currentDayIndex, PLAN_DAYS } from '../core/planner';
 import { promptForTask } from '../core/taskPrompt';
 import { buildTopicPrompt } from '../core/aiPrompt';
+import { lessonsForTask } from '../content/lessons';
 import { DOMAIN_LABEL } from '../types/content';
 import type { PlanDay, PlanTask } from '../types/user';
 import { Badge, Loading, PageHeader, ProgressBar, Stat } from '../components/ui';
@@ -50,6 +51,9 @@ export function TaskRow({ day, task, report }: { day: PlanDay; task: PlanTask; r
         </span>
       </label>
       <div className="flex shrink-0 gap-2 pl-7 sm:pl-0">
+        {lessonsForTask(task)[0] && (
+          <Link to={`/lessons/${lessonsForTask(task)[0].id}${task.type === 'practice' ? '#practice' : ''}`} className="btn btn-primary !px-3 !py-1 text-xs">開始</Link>
+        )}
         <CopyToAIButton compact build={() => promptForTask(task, report)} label={task.type === 'business' ? '請 AI 當主管' : '用 AI 學習'} />
       </div>
     </li>
@@ -203,7 +207,7 @@ export function DashboardPage() {
             {view.todayDay.tasks.map((t) => <TaskRow key={t.taskId} day={view.todayDay} task={t} report={report} />)}
           </ul>
           <p className="mt-3 text-xs text-muted">
-            第 3 階段完成前，課程內容尚未上線，請先用「用 AI 學習」把主題貼到你自己的 Claude 或 ChatGPT 學習。勾選完成只記錄進度，<strong>不會增加能力分數</strong>，能力分數只來自測驗與作品。
+            有「開始」按鈕的任務可以直接進入課程單元；尚未上線的主題請先用「用 AI 學習」貼到你自己的 Claude 或 ChatGPT。完成單元時任務會自動打勾。勾選完成只記錄進度，<strong>不會增加能力分數</strong>，能力分數只來自測驗與作品。
           </p>
         </section>
 
