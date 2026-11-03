@@ -73,7 +73,7 @@ pre, code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
   .btn-ghost { @apply border border-line bg-surface text-ink hover:bg-surface-2; }
   .btn-danger { @apply border border-bad text-bad hover:bg-bad-soft; }
   .card { @apply min-w-0 rounded-xl border border-line bg-surface p-4 sm:p-5; }
-  .input { @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent; }
+  .input { @apply block w-full min-w-0 max-w-full appearance-none rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent; }
   .label { @apply mb-1 block text-sm font-medium text-ink; }
   .chip { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
 }
