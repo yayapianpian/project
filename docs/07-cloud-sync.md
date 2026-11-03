@@ -79,7 +79,9 @@ Supabase 免費方案內建的寄信服務有限制：只會寄給專案成員�
 
 ### 2-4 把連線資訊放進網站（二選一）
 
-**做法 A（建議）：設定在 GitHub，所有裝置自動套用**
+**本站已內建預設連線**（`src/sync/supabase.ts` 的 `DEFAULT_URL`／`DEFAULT_KEY`），所有裝置打開網站即自動連線，直接登入即可。以下兩種做法用於改連到其他 Supabase 專案。
+
+**做法 A：設定在 GitHub，所有裝置自動套用**
 
 1. GitHub 儲存庫 → **Settings** → **Secrets and variables** → **Actions** → **Variables** 分頁 → **New repository variable**。
 2. 新增兩個變數：

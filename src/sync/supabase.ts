@@ -12,19 +12,30 @@ export interface SyncConfig {
 
 const TABLE = 'sync_records';
 
+// 本站的預設 Supabase 專案。Publishable key 本來就設計給網頁公開使用，
+// 資料安全由資料表的列層級安全性（每個帳號只能讀寫自己的資料）保護。
+const DEFAULT_URL = 'https://wfcehyhvenjzmdebaxmg.supabase.co';
+const DEFAULT_KEY = 'sb_publishable_ZpsV6csXQUVeLzvsWSa75w_SvVod9rL';
+
+/** 去掉多貼的路徑，例如 https://xxxx.supabase.co/rest/v1/ */
+export function normalizeUrl(url: string): string {
+  return url.trim().replace(/\/(rest|auth)\/v1\/?.*$/i, '').replace(/\/+$/, '');
+}
+
 export async function loadConfig(): Promise<SyncConfig | null> {
   const envUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  if (envUrl && envKey) return { url: envUrl, key: envKey, source: 'build' };
   const [u, k] = await Promise.all([db.settings.get('sync.url'), db.settings.get('sync.key')]);
   if (typeof u?.value === 'string' && typeof k?.value === 'string' && u.value && k.value) {
     return { url: u.value, key: k.value, source: 'device' };
   }
+  if (envUrl && envKey) return { url: normalizeUrl(envUrl), key: envKey, source: 'build' };
+  if (import.meta.env.MODE !== 'test') return { url: DEFAULT_URL, key: DEFAULT_KEY, source: 'build' };
   return null;
 }
 
 export async function saveDeviceConfig(url: string, key: string) {
-  const clean = url.trim().replace(/\/+$/, '');
+  const clean = normalizeUrl(url);
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(clean) && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(clean)) {
     throw new Error('Project URL 格式應為 https://xxxx.supabase.co');
   }
