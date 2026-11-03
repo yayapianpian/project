@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --surface-2: #f0f2f7;
+  --border: #e2e5ed;
+  --text: #141925;
+  --muted: #5a6377;
+  --accent: #2f6fed;
+  --accent-ink: #ffffff;
+  --accent-soft: #e7eefe;
+  --good: #16865a;
+  --good-soft: #e3f5ec;
+  --warn: #b26a00;
+  --warn-soft: #fdf1de;
+  --bad: #c93c3c;
+  --bad-soft: #fbe7e7;
+  color-scheme: light;
+}
+.dark {
+  --bg: #0c1016;
+  --surface: #141a23;
+  --surface-2: #1b232e;
+  --border: #29323f;
+  --text: #e5e8ee;
+  --muted: #98a2b4;
+  --accent: #6c9bff;
+  --accent-ink: #0c1016;
+  --accent-soft: #1b2944;
+  --good: #3ec98a;
+  --good-soft: #12301f;
+  --warn: #f0a63c;
+  --warn-soft: #33260f;
+  --bad: #ff7070;
+  --bad-soft: #3a1717;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+pre, code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply bg-accent text-accent-ink hover:opacity-90; }
+  .btn-ghost { @apply border border-line bg-surface text-ink hover:bg-surface-2; }
+  .btn-danger { @apply border border-bad text-bad hover:bg-bad-soft; }
+  .card { @apply rounded-xl border border-line bg-surface p-4 sm:p-5; }
+  .input { @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent; }
+  .label { @apply mb-1 block text-sm font-medium text-ink; }
+  .chip { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
