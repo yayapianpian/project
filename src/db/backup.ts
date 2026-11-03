@@ -10,7 +10,7 @@ export interface BackupFile {
 }
 
 /** 永遠不匯出的設定（例如日後的 AI API Key） */
-const SECRET_SETTING_KEYS = new Set(['aiApiKey']);
+const SECRET_SETTING_KEYS = new Set(['aiApiKey', 'sync.key', 'sync.url']);
 
 async function blobToBase64(b: Blob): Promise<string> {
   const bytes = new Uint8Array(await b.arrayBuffer());

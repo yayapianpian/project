@@ -1,0 +1,16 @@
+{
+  "name": "Data Analyst 180 — 數據分析師轉職訓練",
+  "short_name": "DA180",
+  "description": "180 天數據分析師轉職訓練平台",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#2f6fed",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

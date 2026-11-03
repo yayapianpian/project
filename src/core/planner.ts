@@ -164,7 +164,7 @@ export function carryOverStatus(oldDays: PlanDay[], newDays: PlanDay[]): PlanDay
     ...d,
     tasks: d.tasks.map((t) => {
       const old = status.get(t.taskId);
-      return old ? { ...t, status: old.status, completedAt: old.completedAt } : t;
+      return old ? { ...t, status: old.status, completedAt: old.completedAt, updatedAt: old.updatedAt } : t;
     }),
   }));
 }

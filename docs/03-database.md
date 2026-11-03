@@ -304,3 +304,18 @@ interface Settings {               // 以 key/value 儲存
 - 匯出格式：`{ app: 'da180', schemaVersion, exportedAt, stores: {...}, files: [{id, mime, base64}] }`。
 - 匯入流程：驗證格式 → 顯示摘要（作答筆數、專案數、最後活動日）→ 確認 → 先自動匯出一份目前資料 → 覆寫。
 - 熟練度與能力分數可隨時由 `attempts` + `projectSubmissions` **完整重算**，因此即使快取表損壞也能恢復。
+
+## 三、雲端同步資料表（Supabase）
+
+結構見 [`supabase/schema.sql`](../supabase/schema.sql)。採用一張通用資料表存放所有需同步的紀錄：
+
+| 欄位 | 說明 |
+|---|---|
+| `user_id` | 帳號（列層級安全性：只能讀寫自己的資料） |
+| `store` | 本機資料表名稱（attempts、planDays…） |
+| `key` | 同步鍵：作答與診斷使用 `uid`（各裝置唯一），其他使用主鍵 |
+| `data` | 整筆紀錄（JSON） |
+| `updated_at` | 裝置上最後修改時間；伺服器拒絕用較舊的資料覆寫較新的資料 |
+| `server_updated_at` | 伺服器寫入時間，用於增量下載 |
+
+本機第 2 版 schema 為同步資料表加上 `_updatedAt`（由資料庫 hook 自動維護）與 `uid`。同步流程：先下載 `server_updated_at` 之後的資料並合併（每筆取較新者；每日任務逐項合併），再上傳本機上次同步後修改過的資料。熟練度不同步，由作答紀錄在各裝置重算。

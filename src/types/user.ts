@@ -26,6 +26,9 @@ export type AttemptContext =
 
 export interface Attempt {
   id?: number;
+  /** 跨裝置唯一識別碼（同步用，自動產生） */
+  uid?: string;
+  _updatedAt?: string;
   questionId: string;
   domain: Domain;
   concepts: string[];
@@ -58,6 +61,8 @@ export interface QuizSession {
 
 export interface DiagnosticResult {
   id?: number;
+  uid?: string;
+  _updatedAt?: string;
   sessionId: string;
   takenAt: string;
   /** 0–1 */
@@ -77,6 +82,8 @@ export interface PlanTask {
   estMinutes: number;
   status: TaskStatus;
   completedAt?: string;
+  /** 任務狀態最後修改時間（跨裝置合併用） */
+  updatedAt?: string;
 }
 
 export interface PlanDay {
@@ -86,6 +93,7 @@ export interface PlanDay {
   moduleId: string;
   tasks: PlanTask[];
   note?: string;
+  _updatedAt?: string;
 }
 
 export interface ConceptMastery {

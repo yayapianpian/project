@@ -7,6 +7,7 @@ import { downloadJson, exportBackup, importBackup, isPersistentStorage, markBack
 import { useProfile } from '../hooks/data';
 import { ProfileForm } from '../components/ProfileForm';
 import { Loading, Modal, PageHeader } from '../components/ui';
+import { SyncCard } from '../components/SyncPanel';
 
 function fmt(v: unknown) {
   return typeof v === 'string' ? new Date(v).toLocaleString('zh-TW') : '從未';
@@ -75,6 +76,8 @@ export function SettingsPage() {
         {profile && <p className="mt-3 text-xs text-muted">修改開始日或每日時間後，計畫會自動重新排列日期，已完成的任務會保留。</p>}
       </section>
 
+      <SyncCard />
+
       <section className="card">
         <h2 className="mb-1 text-sm font-semibold">備份與還原</h2>
         <p className="mb-4 text-sm text-muted">學習紀錄只存在這個瀏覽器。換電腦、換瀏覽器或清除瀏覽資料前，請先匯出備份。上次備份：{fmt(lastBackup)}</p>
@@ -103,7 +106,7 @@ export function SettingsPage() {
 
       <section className="card border-bad">
         <h2 className="mb-1 text-sm font-semibold text-bad">清除所有資料</h2>
-        <p className="mb-3 text-sm text-muted">刪除這個瀏覽器中的所有學習紀錄、計畫與設定，無法復原。建議先匯出備份。</p>
+        <p className="mb-3 text-sm text-muted">刪除這個瀏覽器中的所有學習紀錄、計畫與設定，無法復原。建議先匯出備份。如果已登入雲端同步，清除後會再從雲端下載；要刪除雲端資料請使用上方「跨裝置雲端同步 → 進階」。</p>
         <button className="btn btn-danger" onClick={() => { setResetText(''); setResetOpen(true); }}>清除所有資料…</button>
       </section>
 

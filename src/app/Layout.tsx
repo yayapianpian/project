@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, Monitor, Moon, Settings, Sun, X } from 'lucide-react';
 import { NAV_ITEMS } from './nav';
 import { applyTheme, getTheme, setTheme, type ThemeChoice } from './theme';
+import { FirstLinkModal, SyncIndicator } from '../components/SyncPanel';
 
 const THEME_NEXT: Record<ThemeChoice, ThemeChoice> = { system: 'light', light: 'dark', dark: 'system' };
 const THEME_LABEL: Record<ThemeChoice, string> = { system: '跟隨系統', light: '淺色', dark: '深色' };
@@ -110,11 +111,13 @@ export function Layout({ children }: { children: ReactNode }) {
           <button className="btn btn-ghost !p-2 lg:hidden" onClick={() => setDrawer(true)} aria-label="開啟選單"><Menu size={18} /></button>
           <div className="text-sm font-medium lg:hidden">Data Analyst 180</div>
           <div className="ml-auto flex items-center gap-2">
+            <SyncIndicator />
             <ThemeToggle />
             <NavLink to="/settings" className="btn btn-ghost !px-2.5" aria-label="設定與備份"><Settings size={16} /><span className="hidden sm:inline">設定</span></NavLink>
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:px-6 sm:py-6">{children}</main>
+        <FirstLinkModal />
       </div>
     </div>
   );

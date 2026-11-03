@@ -22,7 +22,7 @@
 | 試算表公式 | **HyperFormula** 公式引擎 | 在網頁內驗算 `VLOOKUP`/`XLOOKUP`/`SUMIFS`/`COUNTIFS` 等公式，與 Google 試算表／LibreOffice 相容 | 只比對答案數字（無法給「錯在哪」的提示） |
 | 本機資料庫 | **IndexedDB + Dexie.js** | 容量大（可存截圖、報告附件）、支援交易與版本遷移；`navigator.storage.persist()` 降低被瀏覽器清除的機率 | localStorage（5MB、無結構） |
 | 備份 | JSON 匯出／匯入（含附件 base64） | 換電腦、換瀏覽器都能帶走 | — |
-| 雲端同步（選用，第 6 階段後評估） | Supabase 免費方案 | 需要跨裝置時再開，不是必要條件 | — |
+| 跨裝置雲端同步（選用，已上線） | Supabase 免費方案（PostgreSQL + 帳號登入 + 列層級安全性） | 手機、平板、電腦共用同一份紀錄；離線照常使用，恢復網路自動同步。設定見 [07-cloud-sync.md](07-cloud-sync.md) | Firebase（非開源、資料模型較不適合） |
 | AI 導師（選用） | Anthropic Claude API，使用者自備 Key | 見 [05-ai-tutor.md](05-ai-tutor.md) | 平台代付（會產生費用與金鑰外洩風險） |
 | 測試 | **Vitest**（邏輯）＋ **Playwright**（端對端，每個按鈕都要點到） | 第 7 階段的驗收工具 | — |
 | 部署 | **GitHub Pages** 或 Cloudflare Pages（免費） | push 即部署 | — |

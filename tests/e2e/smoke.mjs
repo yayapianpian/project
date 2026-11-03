@@ -116,6 +116,30 @@ try {
   await page.getByText(/今日任務 · 第 1 天/).waitFor();
   check(await page.getByRole('checkbox', { name: /標記「/ }).first().isChecked(), '還原後資料完整（任務狀態保留）');
 
+  // 雲端同步設定畫面（沒有真的 Supabase：檢查表單驗證與連線失敗時的說明）
+  await page.goto(BASE + '#/settings');
+  await page.getByRole('heading', { name: '跨裝置雲端同步' }).waitFor();
+  await page.getByLabel('Project URL').fill('https://not-a-supabase-url.example.com');
+  await page.getByLabel(/Publishable key/).fill('sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxx');
+  await page.getByRole('button', { name: '儲存並連線' }).click();
+  await page.getByText('Project URL 格式應為').waitFor();
+  check(true, '雲端同步：網址格式錯誤會提示');
+  await page.getByLabel('Project URL').fill('https://abcdefghijklmnop.supabase.co');
+  await page.getByRole('button', { name: '儲存並連線' }).click();
+  await page.getByRole('button', { name: '註冊新帳號' }).waitFor();
+  check(true, '雲端同步：儲存連線設定後顯示登入表單');
+  await page.reload();
+  await page.getByRole('button', { name: '註冊新帳號' }).waitFor();
+  check(true, '雲端同步：連線設定在重新整理後保留');
+  const backup2 = await page.evaluate(async () => (await new Promise((res) => { const r = indexedDB.open('da180'); r.onsuccess = () => { const q = r.result.transaction('settings').objectStore('settings').getAll(); q.onsuccess = () => res(q.result); }; })));
+  check(backup2.some((r) => r.key === 'sync.url'), '雲端同步：連線設定存在本機');
+  await page.getByRole('button', { name: '移除這台裝置的連線設定' }).click();
+  await page.getByRole('button', { name: '儲存並連線' }).waitFor();
+  check(true, '雲端同步：可移除連線設定');
+  // 連線失敗時（無法連到 Supabase）不應影響其他功能
+  const keep = errors.filter((e) => !/supabase\.co|Failed to fetch|ERR_|net::/.test(e));
+  errors.splice(0, errors.length, ...keep);
+
   // 手機版
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const m = await mobile.newPage();

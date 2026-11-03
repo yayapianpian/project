@@ -154,7 +154,9 @@ export async function setTaskStatus(dayIndex: number, taskId: string, status: Ta
     const day = await db.planDays.get(dayIndex);
     if (!day) return;
     const tasks = day.tasks.map((t) =>
-      t.taskId === taskId ? { ...t, status, completedAt: status === 'done' ? new Date().toISOString() : undefined } : t,
+      t.taskId === taskId
+        ? { ...t, status, completedAt: status === 'done' ? new Date().toISOString() : undefined, updatedAt: new Date().toISOString() }
+        : t,
     );
     await db.planDays.put({ ...day, tasks } as PlanDay);
   });

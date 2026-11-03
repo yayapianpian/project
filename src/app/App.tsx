@@ -11,10 +11,12 @@ import { AbilitiesPage } from '../pages/Abilities';
 import { SettingsPage } from '../pages/Settings';
 import { ComingSoon } from '../pages/ComingSoon';
 import { requestPersistentStorage } from '../db/backup';
+import { initSync } from '../sync/manager';
 
 export function App() {
   useEffect(() => {
     requestPersistentStorage();
+    initSync();
   }, []);
   return (
     <HashRouter>
