@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Cloud, CloudOff, ExternalLink, LogOut, RefreshCw } from 'lucide-react';
+import { Check, Cloud, CloudOff, Copy, ExternalLink, LogOut, RefreshCw } from 'lucide-react';
+import schemaSql from '../../supabase/schema.sql?raw';
 import {
   configure, deleteCloudData, dismissNotice, fullResync, removeConfig, resolveFirstLink, signIn, signOut, signUp, syncNow, useSyncState,
 } from '../sync/manager';
@@ -27,6 +28,29 @@ function useAction() {
   return { busy, error, run };
 }
 
+function CopySqlButton() {
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(schemaSql);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = schemaSql;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    setDone(true);
+  };
+  return (
+    <button type="button" className="btn btn-ghost" onClick={copy}>
+      {done ? <Check size={16} /> : <Copy size={16} />}
+      {done ? '已複製，請貼到 Supabase 的 SQL Editor' : '複製建表程式碼'}
+    </button>
+  );
+}
+
 function ConfigForm() {
   const [url, setUrl] = useState('');
   const [key, setKey] = useState('');
@@ -40,6 +64,10 @@ function ConfigForm() {
         </a>
         。完成後把專案的網址與金鑰貼在下面。若網站部署時已設定好，這一步會自動略過。
       </p>
+      <div className="rounded-lg bg-surface-2 p-3 text-sm">
+        <div className="mb-2 font-medium">建立資料表（在 Supabase 的 SQL Editor 執行一次）</div>
+        <CopySqlButton />
+      </div>
       <div>
         <label className="label" htmlFor="sb-url">Project URL</label>
         <input id="sb-url" className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" autoComplete="off" />
