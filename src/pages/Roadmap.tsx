@@ -84,7 +84,7 @@ export function RoadmapPage() {
                           <Badge tone="muted">{mdays.length} 天</Badge>
                           {mdays[0].note && <Badge tone={mdays[0].note.includes('壓縮') ? 'good' : 'warn'}>{mdays[0].note.includes('壓縮') ? '已壓縮' : '已加強'}</Badge>}
                         </div>
-                        <ul className="grid gap-1.5">
+                        <ul className="grid grid-cols-1 gap-1.5">
                           {mdays.map((d) => {
                             const st = dayStatus(d, todayIdx);
                             const isOpen = openDay === d.dayIndex;
