@@ -14,7 +14,7 @@ describe('lesson content', () => {
       expect(l.body.length, l.id).toBeGreaterThan(200);
       expect(l.steps.length, l.id).toBeGreaterThanOrEqual(2);
       expect(l.practice.length, l.id).toBeGreaterThanOrEqual(2);
-      expect(l.quiz.length, l.id).toBeGreaterThanOrEqual(3);
+      expect(l.quiz.length, l.id).toBeGreaterThanOrEqual(5);
       expect(l.commonMistakes.length, l.id).toBeGreaterThanOrEqual(2);
       for (const d of l.datasets ?? []) expect(existsSync('public/' + d.file), d.file).toBe(true);
       for (const q of [...l.practice, ...l.quiz]) {
@@ -33,6 +33,13 @@ describe('lesson content', () => {
           Object.keys(q.feedback ?? {}).forEach((k) => expect(q.correct.includes(k), `${q.id} feedback on correct ${k}`).toBe(false));
         }
         expect(gradeObjective(q, q.correct).correct, q.id).toBe(true);
+      }
+      // 練習題的「錯在哪」與「提示」不能直接透露數字答案
+      for (const q of l.practice.filter((x) => x.type === 'fill')) {
+        for (const t of [q.hint, q.wrongHint ?? '']) {
+          const plain = t.replace(/,/g, '');
+          q.correct.filter((c) => /^-?\d/.test(c) && c.length >= 2).forEach((c) => expect(plain.includes(c), `${q.id} 提示洩漏答案 ${c}`).toBe(false));
+        }
       }
     }
     // 第一個月每個主題都有單元

@@ -40,7 +40,7 @@ export const MONTH1C: Lesson[] = [
     datasets: [RETAIL_CSV, STORES_CSV],
     practice: [
       sc({ id: 'l-m1l-1-p1', c: ['data.sheet.lookup'], d: 2, q: 'stores 表的欄位依序是 store_id、store、region、manager、area_ping。要用門市名稱查店長，公式是？',
-        opts: [['=VLOOKUP(C2, stores!A:E, 4, FALSE)', '範圍從 A 欄開始，第一欄是 store_id，不是門市名稱。'], '=VLOOKUP(C2, stores!B:E, 3, FALSE)', ['=VLOOKUP(C2, stores!B:E, 4, FALSE)', '從 B 欄開始數：store=1、region=2、manager=3，第 4 欄是坪數。'], ['=VLOOKUP(C2, stores!B:E, 3)', '少了 FALSE，會變成近似比對，可能回傳錯誤的店長。']],
+        opts: [['=VLOOKUP(C2, stores!A:E, 4, FALSE)', '範圍從 A 欄開始，第一欄是 store_id，不是門市名稱。'], '=VLOOKUP(C2, stores!B:E, 3, FALSE)', ['=VLOOKUP(C2, stores!B:E, 4, FALSE)', '欄數算錯了：要從「範圍的第一欄」開始數，不是從 A 欄。'], ['=VLOOKUP(C2, stores!B:E, 3)', '公式少了一個參數，會變成近似比對，可能回傳錯誤的結果。']],
         ans: 1, exp: '查找值（門市名稱）必須在範圍的第一欄，所以範圍從 B 欄開始；從 B 欄數起，manager 是第 3 欄。最後一定要加 FALSE。', hint: '先決定範圍從哪一欄開始，再從那一欄開始數。' }),
       fill({ id: 'l-m1l-1-p2', c: ['data.sheet.lookup'], d: 3, q: '用「原始」store 欄位（未清理）做 VLOOKUP 查坪數，會有幾列出現 #N/A？', ans: [A.rawStoreVariants], wrong: '用 =COUNTIF(坪數欄,"#N/A") 不一定能計算錯誤值，可以改用 =SUMPRODUCT(--ISNA(N2:N4121))。', hint: '出現 #N/A 的就是門市名稱寫法不標準的那些列。', exp: '這些列就是「臺北信義店」與「台北信義店 」。這說明了為什麼要先標準化，再做查找。' }),
     ],
@@ -123,8 +123,8 @@ export const MONTH1C: Lesson[] = [
     examples: [{ title: '會員平均客單價', lang: 'formula', code: '=AVERAGEIFS(J:J, O:O, "會員")\n=AVERAGEIFS(J:J, O:O, "非會員")', result: `會員約 ${A.memberAov} 元、非會員約 ${A.nonMemberAov} 元` }],
     datasets: [RETAIL_CSV],
     practice: [
-      fill({ id: 'l-m1l-3-p1', c: ['data.sheet.conditional'], d: 3, q: '用清理後的資料計算：北區 2026 年 3 月的營收是多少元？', ans: [A.northMarchRevenue], wrong: '確認三件事：用清理後資料、region = 北區、日期在 3/1（含）到 4/1（不含）之間。', hint: '=SUMIFS(J:J, D:D, "北區", B:B, ">="&DATE(2026,3,1), B:B, "<"&DATE(2026,4,1))', exp: '這是最典型的 SUMIFS 用法：一個加總欄、兩個以上的條件。' }),
-      fill({ id: 'l-m1l-3-p2', c: ['data.sheet.conditional'], d: 3, q: '清理後的資料中，金額 ≥500 的訂單有幾筆？', ans: [A.bigOrders], wrong: '條件要寫成字串 ">=500"，包含雙引號。', hint: '=COUNTIFS(J:J, ">=500")', exp: '大單數量可以用來追蹤高價值交易，例如觀察促銷是否提升了大單比例。' }),
+      fill({ id: 'l-m1l-3-p1', c: ['data.sheet.conditional'], d: 3, q: '用清理後的資料計算：北區 2026 年 3 月的營收是多少元？', ans: [A.northMarchRevenue], wrong: '確認三件事：用清理後資料、region = 北區、日期在 3/1（含）到 4/1（不含）之間。', hint: '用 SUMIFS：條件包括地區，以及日期區間（≥ 3/1 且 < 4/1）。', exp: '這是最典型的 SUMIFS 用法：一個加總欄、兩個以上的條件。' }),
+      fill({ id: 'l-m1l-3-p2', c: ['data.sheet.conditional'], d: 3, q: '清理後的資料中，金額 ≥500 的訂單有幾筆？', ans: [A.bigOrders], wrong: '條件要寫成字串 ">=500"，包含雙引號。', hint: '用 COUNTIFS，條件寫成帶比較符號的字串。', exp: '大單數量可以用來追蹤高價值交易，例如觀察促銷是否提升了大單比例。' }),
     ],
     commonMistakes: ['SUMIF 與 SUMIFS 參數順序搞混。', '條件 ">=500" 忘了加雙引號，或把參照寫成 ">=A1"（應該是 ">="&A1）。', '日期條件寫成 "<=2026/3/31"，遇到含時間的資料會漏掉 3/31 當天。'],
     quiz: [
@@ -158,7 +158,7 @@ export const MONTH1C: Lesson[] = [
     examples: [{ title: '這張表告訴我們什麼？', lang: 'text', code: `3 月 vs 2 月：\n其他四間門市合計 +${A.othersMarchChangePct}%\n高雄夢時代店 ${A.ksMarchChangePct}%\n→ 只有夢時代店在 3 月下滑，值得深入分析` }],
     datasets: [RETAIL_CSV],
     practice: [
-      fill({ id: 'l-m1l-4-p1', c: ['data.sheet.conditional'], d: 4, q: '依你的月報表：高雄夢時代店 3 月營收比 2 月變化了多少 %？（四捨五入到小數第 1 位，下降請填負數，例如 -3.5）', ans: [A.ksMarchChangePct], wrong: '月增率 =（3 月 − 2 月）÷ 2 月。請確認用的是清理後資料。', hint: `夢時代店 2 月 ${A.storeMonth['高雄夢時代店'][1].toLocaleString()} 元、3 月 ${A.storeMonth['高雄夢時代店'][2].toLocaleString()} 元。`, exp: `其他門市 3 月合計成長 ${A.othersMarchChangePct}%，只有夢時代店下降。這是第一個月實戰專案要找出原因的問題。` }),
+      fill({ id: 'l-m1l-4-p1', c: ['data.sheet.conditional'], d: 4, q: '依你的月報表：高雄夢時代店 3 月營收比 2 月變化了多少 %？（四捨五入到小數第 1 位，下降請填負數，例如 -3.5）', ans: [A.ksMarchChangePct], wrong: '月增率 =（3 月 − 2 月）÷ 2 月。請確認用的是清理後資料。', hint: '先在月報表找到夢時代店 2 月與 3 月的營收，再套用月增率公式。', exp: `其他門市 3 月合計成長 ${A.othersMarchChangePct}%，只有夢時代店下降。這是第一個月實戰專案要找出原因的問題。` }),
       sc({ id: 'l-m1l-4-p2', c: ['data.sheet.conditional', 'data.sheet.functions'], d: 3, q: 'B2 的公式要往右複製到 D2、往下複製到 B6，門市名稱在 A 欄、月份在第 1 列。條件參照應該寫成？', opts: [['A2 與 B1', '沒有固定，往右複製時門市會跑到 B 欄，往下複製時月份會跑到第 2 列。'], '$A2 與 B$1', ['$A$2 與 $B$1', '全部固定，整張表都會是信義店 1 月的數字。'], ['A$2 與 $B1', '固定的方向剛好相反。']], ans: 1, exp: '門市在 A 欄，固定欄（$A2）；月份在第 1 列，固定列（B$1）。這和乘法表是同一個原理。', hint: '哪個東西永遠在 A 欄？哪個東西永遠在第 1 列？' }),
     ],
     commonMistakes: ['每一格手動寫不同的公式，下個月資料更新時要全部重寫。', '合計列沒有和原始總營收核對，表內有錯誤也沒發現。', '月增率分母用錯月份（應該除以「比較基準」的月份）。'],
@@ -258,7 +258,7 @@ export const MONTH1C: Lesson[] = [
     examples: [{ title: '下鑽路徑', lang: 'text', code: '全公司 3 月 vs 2 月：成長\n└─ 依門市：只有夢時代店下降\n   └─ 依品類：生鮮下降最多\n      └─ 依日期：3/8～3/21 生鮮幾乎沒有銷售 → 假設：缺貨或設備問題' }],
     datasets: [RETAIL_CSV],
     practice: [
-      fill({ id: 'l-m1p-3-p1', c: ['data.pivot', 'biz.analysis.decompose'], d: 4, q: '高雄夢時代店的「生鮮」營收，3 月比 2 月減少了多少元？', ans: [A.ksFreshDrop], wrong: '篩選夢時代店，列放品類、欄放月份，用 2 月減 3 月。', hint: `夢時代店生鮮：2 月 ${A.kaohsiungFreshByMonth[1].toLocaleString()} 元。`, exp: `生鮮減少 ${A.ksFreshDrop.toLocaleString()} 元，比夢時代店整體減少的 ${A.ksTotalDrop.toLocaleString()} 元還多，代表其他品類其實有成長，問題幾乎全部來自生鮮。` }),
+      fill({ id: 'l-m1p-3-p1', c: ['data.pivot', 'biz.analysis.decompose'], d: 4, q: '高雄夢時代店的「生鮮」營收，3 月比 2 月減少了多少元？', ans: [A.ksFreshDrop], wrong: '篩選夢時代店，列放品類、欄放月份，用 2 月減 3 月。', hint: '篩選夢時代店與生鮮，比較 2 月與 3 月兩欄。', exp: `生鮮減少 ${A.ksFreshDrop.toLocaleString()} 元，比夢時代店整體減少的 ${A.ksTotalDrop.toLocaleString()} 元還多，代表其他品類其實有成長，問題幾乎全部來自生鮮。` }),
       sc({ id: 'l-m1p-3-p2', c: ['data.pivot', 'biz.analysis.decompose'], d: 4, q: '把夢時代店 3 月的生鮮銷售依「日」展開，你會發現什麼？', opts: ['每天都穩定下降', '3 月中旬約兩週生鮮銷售幾乎停止，前後正常', ['只有週末下降', '請實際展開日期觀察。'], ['3 月沒有任何異常', '數字明顯下降，請再檢查。']], ans: 1, exp: '一段時間突然幾乎歸零、之後恢復，通常是「供給面」問題（缺貨、設備故障、停售），而不是顧客需求改變。下一步是找門市確認那段時間發生了什麼。', hint: '在樞紐分析表把日期放到列，篩選夢時代店與生鮮。' }),
     ],
     commonMistakes: ['看到總數下降就直接提出建議，沒有下鑽找出在哪裡下降。', '只看變化率，忽略金額大小，花時間分析影響很小的項目。', '找到「哪裡」下降就停止，沒有進一步提出「為什麼」的假設並驗證。'],

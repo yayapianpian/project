@@ -28,9 +28,9 @@ export const MONTH1B: Lesson[] = [
     examples: [{ title: '一次清理門市名稱', lang: 'formula', code: '=SUBSTITUTE(TRIM(C2),"臺","台")', result: '「臺北信義店」、「台北信義店 」都會變成「台北信義店」' }],
     datasets: [RETAIL_CSV],
     practice: [
-      sc({ id: 'l-m1s-3-p1', c: ['data.clean.standardize'], d: 2, q: '=LEFT("2026-03-15", 7) 的結果是？', opts: [['2026-03-1', '數一下：7 個字元是 2、0、2、6、-、0、3。'], '2026-03', ['2026', '那是取 4 個字元。'], ['03-15', '那是從右邊取。']], ans: 1, exp: 'LEFT 從左邊取指定字數。「2026-03」剛好 7 個字元，常用來把日期轉成「年月」做分組。', hint: '一個一個數，連「-」也算一個字元。' }),
+      sc({ id: 'l-m1s-3-p1', c: ['data.clean.standardize'], d: 2, q: '=LEFT("2026-03-15", 7) 的結果是？', opts: [['2026-03-1', '字數再數一次，「-」也算一個字元。'], '2026-03', ['2026', '那是取 4 個字元。'], ['03-15', '那是從右邊取。']], ans: 1, exp: 'LEFT 從左邊取指定字數。「2026-03」剛好 7 個字元，常用來把日期轉成「年月」做分組。', hint: '一個一個數，連「-」也算一個字元。' }),
       fill({ id: 'l-m1s-3-p2', c: ['data.clean.standardize'], d: 3, q: `在 retail_sales.csv 中，store 欄位被寫成「臺北信義店」或「台北信義店 」（多一個空白）的列共有幾列？（提示：用 COUNTIF 分別計算這兩種寫法再相加；重複列也要算進去）`,
-        ans: [A.rawStoreVariants], wrong: '請確認兩種寫法都有算到。注意「台北信義店 」最後有一個空白，COUNTIF 的條件也要包含那個空白。', hint: '=COUNTIF(C:C,"臺北信義店")+COUNTIF(C:C,"台北信義店 ")', exp: '這些列在樞紐分析表中會被當成另外兩間門市，讓信義店的營收被低估。清理時用 TRIM + SUBSTITUTE 統一名稱。' }),
+        ans: [A.rawStoreVariants], wrong: '請確認兩種寫法都有算到。注意「台北信義店 」最後有一個空白，COUNTIF 的條件也要包含那個空白。', hint: '用兩個 COUNTIF 分別計算兩種寫法，再相加。', exp: '這些列在樞紐分析表中會被當成另外兩間門市，讓信義店的營收被低估。清理時用 TRIM + SUBSTITUTE 統一名稱。' }),
     ],
     commonMistakes: ['肉眼看起來一樣就以為一樣，沒有檢查前後空白。', '用「尋找與取代」手動修改，下次匯入新資料時又要再做一次；用公式可以重複使用。', 'TEXT 轉出來的是文字，不能再拿來加總。'],
     quiz: [
@@ -63,8 +63,8 @@ export const MONTH1B: Lesson[] = [
     examples: [{ title: '計算 RFM 的 R（距今天數）', lang: 'formula', code: '=DATEDIF(最後購買日, DATE(2026,3,31), "D")', result: '以 2026/3/31 為基準日，算出每位會員最後一次購買距今幾天' }],
     datasets: [RETAIL_CSV],
     practice: [
-      sc({ id: 'l-m1s-4-p1', c: ['data.sheet.functions'], d: 2, q: '=EOMONTH("2026-02-10", 0) 的結果是？', opts: [['2026/2/10', 'EOMONTH 回傳的是月底，不是原日期。'], '2026/2/28', ['2026/3/31', '第二個參數 0 代表「同一個月」。'], ['2026/1/31', '那是 EOMONTH(…, -1)。']], ans: 1, exp: 'EOMONTH(日期, 0) 回傳當月最後一天。2026 年不是閏年，2 月最後一天是 28 日。', hint: 'End Of Month，第二個參數是往後幾個月。' }),
-      fill({ id: 'l-m1s-4-p2', c: ['data.sheet.functions'], d: 2, q: '2026 年 3 月 15 日是星期日。=WEEKDAY("2026-03-15", 2) 的結果是？', ans: ['7'], wrong: '第二個參數 2 代表「週一 = 1」的算法，那週日是多少？', hint: '週一=1、週二=2……依序往下數。', exp: 'WEEKDAY 第二個參數為 2 時，週一=1、週日=7。這是台灣與歐洲常用的算法；參數為 1（預設）時週日=1。' }),
+      sc({ id: 'l-m1s-4-p1', c: ['data.sheet.functions'], d: 2, q: '=EOMONTH("2026-02-10", 0) 的結果是？', opts: [['2026/2/10', 'EOMONTH 回傳的是月底，不是原日期。'], '2026/2/28', ['2026/3/31', '第二個參數代表往後幾個月，想想 0 是什麼意思。'], ['2026/1/31', '那是 EOMONTH(…, -1)。']], ans: 1, exp: 'EOMONTH(日期, 0) 回傳當月最後一天。2026 年不是閏年，2 月最後一天是 28 日。', hint: 'End Of Month，第二個參數是往後幾個月。' }),
+      fill({ id: 'l-m1s-4-p2', c: ['data.sheet.functions'], d: 2, q: '2026 年 3 月 15 日是星期日。=WEEKDAY("2026-03-15", 2) 的結果是？', ans: ['7'], wrong: '第二個參數會改變星期的編號方式，請查一下參數 2 的編號規則。', hint: '週一=1、週二=2……依序往下數。', exp: 'WEEKDAY 第二個參數為 2 時，週一=1、週日=7。這是台灣與歐洲常用的算法；參數為 1（預設）時週日=1。' }),
     ],
     commonMistakes: ['日期被匯入成文字，所有日期函數都回傳錯誤；要先轉成日期格式。', 'WEEKDAY 沒有指定第二個參數，週日變成 1，分析「週末」時算錯。', '用 TODAY() 做報表基準日，每天打開數字都會變；分析報告應固定基準日。'],
     quiz: [
@@ -131,7 +131,7 @@ export const MONTH1B: Lesson[] = [
     datasets: [RETAIL_CSV],
     practice: [
       fill({ id: 'l-m1c-1-p1', c: ['data.clean.profiling'], d: 2, q: 'retail_sales.csv 總共有幾列資料？（不含標題列）', ans: [A.rawRows], wrong: '記得不要把第 1 列的欄位名稱算進去。', hint: '=COUNTA(A:A)-1，或看最後一列的列號再減 1。', exp: '這是原始資料的列數，包含重複列與測試訂單。之後清理完會比這個數字少。' }),
-      fill({ id: 'l-m1c-1-p2', c: ['data.clean.profiling', 'data.clean.duplicates'], d: 3, q: 'order_id 欄位中，不重複的訂單編號有幾個？', ans: [A.rawRows - A.duplicateRows], wrong: '請用 COUNTUNIQUE（Google 試算表）或 UNIQUE + ROWS（Excel）計算。', hint: '=COUNTUNIQUE(A2:A4121)', exp: `總列數 ${A.rawRows} − 不重複 ${A.rawRows - A.duplicateRows} = ${A.duplicateRows} 列重複。這代表有訂單被系統重複寫入，直接加總會高估營收。` }),
+      fill({ id: 'l-m1c-1-p2', c: ['data.clean.profiling', 'data.clean.duplicates'], d: 3, q: 'order_id 欄位中，不重複的訂單編號有幾個？', ans: [A.rawRows - A.duplicateRows], wrong: '請用 COUNTUNIQUE（Google 試算表）或 UNIQUE + ROWS（Excel）計算。', hint: 'Google 試算表有一個專門計算「不重複數量」的函數。', exp: `總列數 ${A.rawRows} − 不重複 ${A.rawRows - A.duplicateRows} = ${A.duplicateRows} 列重複。這代表有訂單被系統重複寫入，直接加總會高估營收。` }),
       sc({ id: 'l-m1c-1-p3', c: ['data.clean.profiling'], d: 3, q: '在 member_id 欄位篩選時，除了 M 開頭的會員編號和空白，你還會看到什麼可疑的值？', opts: ['TEST', ['VIP', '資料中沒有這個值，請實際開啟篩選看看。'], ['0000', '資料中沒有這個值。'], ['NULL', '資料中沒有這個值。']], ans: 0, exp: 'member_id 為 TEST 的是測試訂單（order_id 也是 TEST 開頭），不是真實交易，分析前要排除。', hint: '打開 member_id 欄位的篩選下拉清單，往下捲到最後。' }),
     ],
     commonMistakes: ['拿到資料直接做樞紐分析，沒有先檢查重複與異常值。', '發現問題後直接刪除，沒有記錄刪了什麼、為什麼刪。', '只檢查一個欄位就認為資料沒問題。'],
@@ -167,7 +167,7 @@ export const MONTH1B: Lesson[] = [
     examples: [{ title: '清理後確認', lang: 'formula', code: '=COUNTUNIQUE(M2:M4121)    ← store_clean 欄', result: '結果應為 5（5 間門市）' }],
     datasets: [RETAIL_CSV],
     practice: [
-      fill({ id: 'l-m1c-2-p1', c: ['data.clean.standardize'], d: 2, q: '原始 store 欄位共有幾種不同的寫法？', ans: [A.rawStoreSpellings], wrong: '用篩選下拉清單或 =COUNTUNIQUE(C2:C4121) 數一數。注意尾端有空白的寫法也是一種。', hint: '5 間門市，再加上信義店的兩種錯誤寫法。', exp: '5 個正確名稱 + 「臺北信義店」+「台北信義店 」= 7 種。清理後應該只剩 5 種。' }),
+      fill({ id: 'l-m1c-2-p1', c: ['data.clean.standardize'], d: 2, q: '原始 store 欄位共有幾種不同的寫法？', ans: [A.rawStoreSpellings], wrong: '用篩選下拉清單或 =COUNTUNIQUE(C2:C4121) 數一數。注意尾端有空白的寫法也是一種。', hint: '先數正確的門市有幾間，再找出寫法不標準的有幾種。', exp: '5 個正確名稱 + 「臺北信義店」+「台北信義店 」= 7 種。清理後應該只剩 5 種。' }),
       fill({ id: 'l-m1c-2-p2', c: ['data.clean.standardize'], d: 3, q: '還沒去除重複列之前，用 store_clean（名稱清理後）計算，台北信義店共有幾列？', ans: [A.rawXinyiRows], wrong: '確認你是用清理後的欄位計算，而且清理公式同時處理了 TRIM 與「臺」→「台」。', hint: '=COUNTIF(M:M,"台北信義店")，M 欄是 store_clean。', exp: '清理後信義店的列數會比原始欄位直接 COUNTIF 多出好幾十列，那些就是之前被拆散的資料。' }),
     ],
     commonMistakes: ['直接在原始欄位上修改，改錯了無法還原。', '只處理了一種錯誤寫法，沒有檢查是否還有其他寫法。', '清理後沒有再次檢查不重複值的數量。'],
@@ -203,7 +203,7 @@ export const MONTH1B: Lesson[] = [
     examples: [{ title: '找出重複的訂單編號', lang: 'formula', code: '=COUNTIF($A$2:A2, A2)', result: '第一次出現為 1，之後重複出現為 2、3……' }],
     datasets: [RETAIL_CSV],
     practice: [
-      fill({ id: 'l-m1c-3-p1', c: ['data.clean.duplicates'], d: 3, q: '用「移除重複項目」（依所有欄位）處理 retail_sales.csv 後，會移除幾列？', ans: [A.duplicateRows], wrong: '用「資料清理 → 移除重複項目」時，軟體會告訴你移除了幾列。或用總列數減去 COUNTUNIQUE(order_id)。', hint: `原始 ${A.rawRows} 列，不重複的 order_id 有 ${A.rawRows - A.duplicateRows} 個。`, exp: `系統重複寫入了 ${A.duplicateRows} 筆訂單。如果不移除，營收會被高估。` }),
+      fill({ id: 'l-m1c-3-p1', c: ['data.clean.duplicates'], d: 3, q: '用「移除重複項目」（依所有欄位）處理 retail_sales.csv 後，會移除幾列？', ans: [A.duplicateRows], wrong: '用「資料清理 → 移除重複項目」時，軟體會告訴你移除了幾列。或用總列數減去 COUNTUNIQUE(order_id)。', hint: '總列數和「不重複的訂單編號數」之間的差距，就是重複的列數。', exp: `系統重複寫入了 ${A.duplicateRows} 筆訂單。如果不移除，營收會被高估。` }),
       sc({ id: 'l-m1c-3-p2', c: ['data.clean.duplicates'], d: 3, q: '同一個 order_id 出現兩次，但金額不同（一筆 300、一筆 270）。最好的處理方式是？', opts: [['直接刪除第二筆', '兩筆內容不同，不能確定哪一筆是對的。'], '不要直接刪除，先確認原因（例如是否修改過訂單），再依規則保留正確的一筆', ['兩筆都保留', '同一張訂單算兩次會高估營收。'], ['兩筆金額平均', '平均出來的數字兩筆都不對。']], ans: 1, exp: 'ID 重複但內容不同，代表業務上可能發生了修改、部分退貨等狀況。要先問清楚規則（例如保留最後更新的版本），不能自己決定。', hint: '這和「系統重複寫入、內容完全一樣」是同一種情況嗎？' }),
     ],
     commonMistakes: ['去重複時只選了 order_id 一欄，把「同一張訂單的多個品項」也刪掉了。', '沒有先檢查就刪除，誤刪了不是重複的資料。', '去重複的範圍沒有包含所有欄位，導致內容不同的列也被刪除。'],
@@ -234,7 +234,7 @@ export const MONTH1B: Lesson[] = [
     examples: [{ title: '會員訂單占比', lang: 'formula', code: '=COUNTIF(O2:O4078,"會員")/COUNTA(O2:O4078)', result: '清理後資料的會員訂單占比' }],
     datasets: [RETAIL_CSV],
     practice: [
-      sc({ id: 'l-m1c-4-p1', c: ['data.clean.profiling'], d: 2, q: 'retail_sales 中 member_id 空白，最可能的原因與處理方式是？', opts: [['資料錯誤，應該刪除這些訂單', '非會員也是真實的顧客與營收，刪除會低估營收。'], '這些是非會員訂單，保留並標記為「非會員」', ['應該填入 0', '0 不是有效的會員編號，會造成誤解。'], ['應該隨機填入一個會員編號', '這會捏造資料。']], ans: 1, exp: '超市有很多顧客沒有加入會員，這是業務上的正常狀態，不是資料錯誤。保留並標記，就能比較會員與非會員的消費差異。', hint: '去超市買東西，每個人都會出示會員卡嗎？' }),
+      sc({ id: 'l-m1c-4-p1', c: ['data.clean.profiling'], d: 2, q: 'retail_sales 中 member_id 空白，最可能的原因與處理方式是？', opts: [['資料錯誤，應該刪除這些訂單', '刪除這些訂單，營收會被低估。這些真的是錯誤資料嗎？'], '這些是非會員訂單，保留並標記為「非會員」', ['應該填入 0', '0 不是有效的會員編號，會造成誤解。'], ['應該隨機填入一個會員編號', '這會捏造資料。']], ans: 1, exp: '超市有很多顧客沒有加入會員，這是業務上的正常狀態，不是資料錯誤。保留並標記，就能比較會員與非會員的消費差異。', hint: '去超市買東西，每個人都會出示會員卡嗎？' }),
       fill({ id: 'l-m1c-4-p2', c: ['data.clean.profiling'], d: 3, q: `在清理後的資料（去除重複與測試訂單，共 ${A.cleanRows} 列）中，會員訂單占比是多少 %？（四捨五入到小數第 1 位，只填數字）`, ans: [A.memberRate], wrong: '確認你使用的是清理後的資料（去重複、排除 TEST），而且分母是全部訂單數。', hint: '會員訂單數 ÷ 總訂單數 × 100。', exp: `約 ${A.memberRate}% 的訂單來自會員。這個數字可以作為會員經營的基準，例如目標提升到 70%。` }),
     ],
     commonMistakes: ['看到空白就刪除整列，結果刪掉了大量有效的非會員訂單。', '把缺失值填成 0，拉低平均數。', '填補缺失值後沒有在報告中說明。'],
@@ -273,7 +273,7 @@ export const MONTH1B: Lesson[] = [
     examples: [{ title: '資料說明範例', lang: 'text', code: `原始資料：${A.rawRows} 列\n移除系統重複：${A.duplicateRows} 列\n移除測試訂單：${A.testRows} 列\n清理後：${A.cleanRows} 列\n門市名稱標準化：${A.rawStoreVariants} 列` }],
     datasets: [RETAIL_CSV],
     practice: [
-      fill({ id: 'l-m1c-5-p1', c: ['data.clean.business_rules', 'data.clean.duplicates'], d: 3, q: '依本課程的三條清理規則處理後，資料剩下幾列？', ans: [A.cleanRows], wrong: '確認你同時做了：移除完全重複、排除 TEST 訂單。', hint: `原始 ${A.rawRows} 列 − 重複 ${A.duplicateRows} 列 − 測試訂單 ${A.testRows} 列。`, exp: '這是之後所有分析的基礎資料。清理後的列數要寫進報告的資料說明。' }),
+      fill({ id: 'l-m1c-5-p1', c: ['data.clean.business_rules', 'data.clean.duplicates'], d: 3, q: '依本課程的三條清理規則處理後，資料剩下幾列？', ans: [A.cleanRows], wrong: '確認你同時做了：移除完全重複、排除 TEST 訂單。', hint: '原始列數，減去重複的列，再減去測試訂單的列數。', exp: '這是之後所有分析的基礎資料。清理後的列數要寫進報告的資料說明。' }),
       fill({ id: 'l-m1c-5-p2', c: ['data.clean.business_rules'], d: 4, q: '清理後，2026 年第一季的總營收（amount 加總）是多少元？', ans: [A.totalRevenue], wrong: '數字偏大的話，檢查是否還有重複列或測試訂單沒移除。', hint: '對清理後的 amount 欄位用 SUM。', exp: `清理後總營收為 ${A.totalRevenue.toLocaleString()} 元。如果直接加總原始資料，會因為重複列而高估。` }),
     ],
     commonMistakes: ['沒有排除測試訂單，營收與訂單數被灌水。', '自己決定退款要不要算，沒有和需求方確認，結果和財務數字不同。', '清理規則沒有寫下來，下個月同事接手時無法重現。'],
