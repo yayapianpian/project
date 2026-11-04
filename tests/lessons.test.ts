@@ -25,14 +25,15 @@ describe('lesson content', () => {
         expect(q.explanation.length, q.id).toBeGreaterThan(10);
         expect(q.correct.length, q.id).toBeGreaterThan(0);
         q.correct.forEach((c) => expect(c, q.id).not.toBe(''));
-        if (q.type === 'fill') expect(q.wrongHint, q.id).toBeTruthy();
+        if (q.type === 'sql') expect(q.sql?.reference, q.id).toBeTruthy();
+        else if (q.type === 'fill') expect(q.wrongHint, q.id).toBeTruthy();
         else {
           const opts = new Set(q.options!.map((o) => o.id));
           q.correct.forEach((c) => expect(opts.has(c), `${q.id} ${c}`).toBe(true));
           // 錯誤選項的回饋不能掛在正確答案上
           Object.keys(q.feedback ?? {}).forEach((k) => expect(q.correct.includes(k), `${q.id} feedback on correct ${k}`).toBe(false));
         }
-        expect(gradeObjective(q, q.correct).correct, q.id).toBe(true);
+        if (q.type !== 'sql') expect(gradeObjective(q, q.correct).correct, q.id).toBe(true);
       }
       // 練習題的「錯在哪」與「提示」不能直接透露數字答案
       for (const q of l.practice.filter((x) => x.type === 'fill')) {
@@ -42,8 +43,8 @@ describe('lesson content', () => {
         }
       }
     }
-    // 第一個月每個主題都有單元
-    for (const m of MODULES.filter((x) => x.phase === 1)) {
+    // 第一、二個月每個主題都有單元
+    for (const m of MODULES.filter((x) => x.phase <= 2)) {
       m.topics.forEach((_, i) => expect(LESSONS.some((l) => l.moduleId === m.id && l.topicIndex === i), `${m.id} #${i}`).toBe(true));
     }
   });

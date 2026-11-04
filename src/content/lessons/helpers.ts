@@ -46,6 +46,15 @@ export function fill(p: Base & { ans: (string | number)[]; wrong: string }): Les
   return { id: p.id, domain: domainOf(p.c), type: 'fill', difficulty: p.d, concepts: p.c, prompt: p.q, code: p.code, codeLang: p.lang, correct: p.ans.map(String), explanation: p.exp, hint: p.hint, wrongHint: p.wrong };
 }
 
+/** SQL 實作題：在練習資料庫執行，比對查詢結果 */
+export function sq(p: Omit<Base, 'code' | 'lang'> & { ref: string; order?: boolean; must?: [pattern: string, label: string][]; starter?: string }): LessonQuestion {
+  return {
+    id: p.id, domain: domainOf(p.c), type: 'sql', difficulty: p.d, concepts: p.c, prompt: p.q, correct: [p.ref.trim()],
+    explanation: p.exp, hint: p.hint,
+    sql: { reference: p.ref.trim(), orderMatters: p.order, mustUse: p.must?.map(([pattern, label]) => ({ pattern, label })), starter: p.starter },
+  };
+}
+
 export function lesson(moduleId: string, topicIndex: number, l: Omit<Lesson, 'id' | 'moduleId' | 'topicIndex' | 'title'>): Lesson {
   const m = MODULE_BY_ID[moduleId];
   if (!m || !m.topics[topicIndex]) throw new Error(`找不到主題：${moduleId} #${topicIndex}`);

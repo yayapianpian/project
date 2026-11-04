@@ -123,6 +123,24 @@ try {
   await page.getByText('單元小測').first().waitFor();
   check(true, '小測成績出現在測驗紀錄');
 
+  // SQL 單元：在瀏覽器內的 PostgreSQL 執行與批改
+  await page.goto(BASE + '#/lessons/m2-select-1');
+  await page.getByRole('heading', { name: '資料庫、資料表與欄位型別' }).waitFor();
+  const sp = page.locator('#practice .rounded-xl').first();
+  await sp.getByLabel('SQL 查詢').fill('SELECT product_name FROM products;');
+  await sp.getByRole('button', { name: '送出' }).click();
+  await sp.getByText('錯在哪：').waitFor({ timeout: 60000 });
+  check((await sp.getByText(/你的結果有 1 個欄位，題目要求 2 個欄位/).count()) === 1, 'SQL 練習：在瀏覽器執行並指出欄位數不對');
+  await sp.getByLabel('SQL 查詢').fill('SELECT p.product_name, p.category FROM products p ORDER BY 2;');
+  await sp.getByRole('button', { name: '再試一次' }).click();
+  await sp.getByText('第 2 次答對').waitFor({ timeout: 30000 });
+  check(true, 'SQL 練習：不同寫法但結果相同也判定正確');
+  await page.goto(BASE + '#/sql');
+  await page.getByRole('heading', { name: 'SQL 練習室' }).waitFor();
+  await page.getByRole('button', { name: '執行（預覽結果）' }).click();
+  await page.getByText(/共 5 列/).waitFor({ timeout: 30000 });
+  check(true, 'SQL 練習室：可自由執行查詢並顯示結果');
+
   // 路線頁
   await page.goto(BASE + '#/roadmap');
   await page.getByText('第 1 個月：資料分析基礎').waitFor();
@@ -139,7 +157,7 @@ try {
   const backupPath = `${OUT}/backup.json`;
   await dl.saveAs(backupPath);
   const backup = JSON.parse(readFileSync(backupPath, 'utf8'));
-  check(backup.app === 'da180' && backup.stores.attempts.length === 37 && backup.stores.planDays.length === 180, '備份包含 37 筆作答（診斷 30 + 練習 2 + 小測 5）與 180 天計畫');
+  check(backup.app === 'da180' && backup.stores.attempts.length === 38 && backup.stores.planDays.length === 180, '備份包含 38 筆作答（診斷 30 + 練習 3 + 小測 5）與 180 天計畫');
 
   await page.getByRole('button', { name: '清除所有資料…' }).click();
   await page.getByLabel('請輸入「清除」兩個字確認').fill('清除');
@@ -151,7 +169,7 @@ try {
 
   await page.goto(BASE + '#/settings');
   await page.locator('input[type=file]').setInputFiles(backupPath);
-  await page.getByText('作答紀錄 37 筆').waitFor();
+  await page.getByText('作答紀錄 38 筆').waitFor();
   const [, ] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: '覆寫並還原' }).click()]);
   await page.getByText('已還原備份').waitFor();
   await page.goto(BASE);
@@ -193,6 +211,12 @@ try {
   const lessonOverflow = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check(lessonOverflow <= 0, `手機版課程單元沒有水平捲動（溢出 ${lessonOverflow}px）`);
   await m.screenshot({ path: `${OUT}/lesson-mobile.png`, fullPage: true });
+  await m.goto(BASE + '#/lessons/m2-join-1');
+  await m.getByRole('heading', { name: 'INNER / LEFT JOIN' }).first().waitFor().catch(() => {});
+  await m.locator('#practice').scrollIntoViewIfNeeded();
+  const sqlOverflow = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  check(sqlOverflow <= 0, `手機版 SQL 單元沒有水平捲動（溢出 ${sqlOverflow}px）`);
+  await m.locator('#practice').screenshot({ path: `${OUT}/sql-practice-mobile.png` });
 
   check(errors.length === 0, '沒有任何頁面錯誤' + (errors.length ? '\n' + errors.join('\n') : ''));
   console.log('\n全部驗收通過');

@@ -6,12 +6,12 @@ import { db } from '../db/db';
 import { markLessonPracticed, markLessonRead, recordAttempt, submitLessonQuiz, type LessonProgressRow } from '../db/repo';
 import { LESSON_BY_ID, nextLesson } from '../content/lessons';
 import { MODULE_BY_ID, PHASES } from '../content/curriculum';
-import { gradeObjective } from '../core/grading';
+import { gradeLessonQuestion } from '../core/gradeQuestion';
 import { gradeLabel } from '../core/scoring';
 import { buildTopicPrompt } from '../core/aiPrompt';
 import { DOMAIN_LABEL, type Lesson, type LessonQuestion } from '../types/content';
 import { Markdown } from '../components/Markdown';
-import { AnswerInput, answerLabel, PracticeQuestion } from '../components/LessonQuestion';
+import { AnswerInput, answerLabel, PracticeQuestion, typeLabel } from '../components/LessonQuestion';
 import { CopyToAIButton } from '../components/CopyToAI';
 import { Badge, PageHeader } from '../components/ui';
 
@@ -62,18 +62,18 @@ function Practice({ lesson }: { lesson: Lesson }) {
 
 function Quiz({ lesson, progress }: { lesson: Lesson; progress?: LessonProgressRow }) {
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
-  const [result, setResult] = useState<{ score: number; graded: { q: LessonQuestion; answer: string[]; correct: boolean; ratio: number }[] } | null>(null);
+  const [result, setResult] = useState<{ score: number; graded: { q: LessonQuestion; answer: string[]; correct: boolean; ratio: number; where?: string }[] } | null>(null);
   const [busy, setBusy] = useState(false);
   const startedAt = useRef(new Date().toISOString());
   const allAnswered = lesson.quiz.every((q) => (answers[q.id] ?? []).some((v) => v.trim() !== ''));
 
   const submit = async () => {
     setBusy(true);
-    const graded = lesson.quiz.map((q) => {
+    const graded = await Promise.all(lesson.quiz.map(async (q) => {
       const answer = answers[q.id] ?? [];
-      const g = gradeObjective(q, answer);
-      return { q, answer, correct: g.correct, ratio: g.scoreRatio };
-    });
+      const g = await gradeLessonQuestion(q, answer);
+      return { q, answer, correct: g.correct, ratio: g.ratio, where: g.where };
+    }));
     const now = new Date().toISOString();
     const { score } = await submitLessonQuiz(
       lesson.id,
@@ -95,15 +95,26 @@ function Quiz({ lesson, progress }: { lesson: Lesson; progress?: LessonProgressR
           <div className="text-2xl font-semibold tabular-nums">{result.score} 分</div>
           <div className="text-sm">{gradeLabel(result.score)}　·　答對 {result.graded.filter((g) => g.correct).length} / {result.graded.length} 題　·　{result.score >= 80 ? '通過本單元' : '80 分以上算通過，建議複習後再試一次'}</div>
         </div>
-        {result.graded.map(({ q, answer, correct, ratio }, i) => (
+        {result.graded.map(({ q, answer, correct, ratio, where }, i) => (
           <div key={q.id} className="rounded-xl border border-line p-4">
             <div className="mb-1 flex items-center gap-1.5">
               {correct ? <Badge tone="good">答對</Badge> : <Badge tone="bad">{ratio > 0 ? `部分正確 ${Math.round(ratio * 100)}%` : '答錯'}</Badge>}
               <span className="text-xs text-muted">第 {i + 1} 題</span>
             </div>
             <p className="whitespace-pre-line text-sm">{q.prompt}</p>
-            <p className="mt-2 text-sm"><span className="text-muted">你的答案：</span><span className={correct ? 'text-good' : 'text-bad'}>{answerLabel(q, answer) || '（未作答）'}</span></p>
-            {!correct && <p className="text-sm"><span className="text-muted">正確答案：</span><span className="text-good">{answerLabel(q, q.correct)}</span></p>}
+            {q.type === 'sql' ? (
+              <>
+                <div className="mt-2 text-xs text-muted">你的查詢：</div>
+                <pre className="overflow-x-auto rounded-lg border border-line p-2 text-xs">{answer[0] || '（未作答）'}</pre>
+                {!correct && where && <p className="mt-1 text-sm text-bad">{where}</p>}
+                {!correct && <><div className="mt-2 text-xs text-muted">參考寫法：</div><pre className="overflow-x-auto rounded-lg border border-line p-2 text-xs">{q.correct[0]}</pre></>}
+              </>
+            ) : (
+              <>
+                <p className="mt-2 text-sm"><span className="text-muted">你的答案：</span><span className={correct ? 'text-good' : 'text-bad'}>{answerLabel(q, answer) || '（未作答）'}</span></p>
+                {!correct && <p className="text-sm"><span className="text-muted">正確答案：</span><span className="text-good">{answerLabel(q, q.correct)}</span></p>}
+              </>
+            )}
             <p className="mt-2 rounded-lg bg-surface-2 p-3 text-sm leading-relaxed"><span className="font-medium">解析：</span>{q.explanation}</p>
           </div>
         ))}
@@ -127,7 +138,7 @@ function Quiz({ lesson, progress }: { lesson: Lesson; progress?: LessonProgressR
       </p>
       {lesson.quiz.map((q, i) => (
         <div key={q.id} className="rounded-xl border border-line p-4">
-          <div className="mb-1 flex flex-wrap gap-1.5"><Badge tone="muted">第 {i + 1} 題</Badge><Badge tone="muted">{q.type === 'single' ? '單選' : q.type === 'multi' ? '多選' : '填空'}</Badge></div>
+          <div className="mb-1 flex flex-wrap gap-1.5"><Badge tone="muted">第 {i + 1} 題</Badge><Badge tone="muted">{typeLabel(q)}</Badge></div>
           <p className="whitespace-pre-line text-sm leading-relaxed">{q.prompt}</p>
           <AnswerInput q={q} value={answers[q.id] ?? []} onChange={(v) => setAnswers({ ...answers, [q.id]: v })} />
         </div>

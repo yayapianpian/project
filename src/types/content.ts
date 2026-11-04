@@ -36,7 +36,7 @@ export interface ChoiceOption {
   text: string;
 }
 
-export type ObjectiveType = 'single' | 'multi' | 'fill';
+export type ObjectiveType = 'single' | 'multi' | 'fill' | 'sql';
 
 /** 客觀題（單選、多選、填空）。第 4 階段會再加入 SQL / Python 等實作題型。 */
 export interface ObjectiveQuestion {
@@ -83,6 +83,8 @@ export interface LessonQuestion extends ObjectiveQuestion {
   feedback?: Record<string, string>;
   /** 第一段（填空題）：答錯時指出錯在哪 */
   wrongHint?: string;
+  /** SQL 實作題：以查詢結果比對批改 */
+  sql?: import('../core/sqlGrade').SqlCheck;
 }
 
 export interface LessonExample {

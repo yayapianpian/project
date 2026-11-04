@@ -1,19 +1,23 @@
 import { useRef, useState } from 'react';
 import { CheckCircle2, Eye, Lightbulb, Search, XCircle } from 'lucide-react';
 import type { LessonQuestion } from '../types/content';
-import { gradeObjective } from '../core/grading';
+import { gradeLessonQuestion } from '../core/gradeQuestion';
+import { SqlEditor } from './SqlEditor';
 import { buildQuestionReviewPrompt } from '../core/aiPrompt';
 import { CopyToAIButton } from './CopyToAI';
 import { Badge, Modal } from './ui';
 import { CodeBlock } from '../pages/Diagnostic';
 
 export function answerLabel(q: LessonQuestion, ids: string[]): string {
-  if (q.type === 'fill') return ids[0] ?? '';
+  if (q.type === 'fill' || q.type === 'sql') return ids[0] ?? '';
   return ids.map((id) => `(${id}) ${q.options?.find((o) => o.id === id)?.text ?? ''}`).join('；');
 }
 
 /** 作答區（單選、多選、填空），練習與小測共用 */
 export function AnswerInput({ q, value, onChange, disabled }: { q: LessonQuestion; value: string[]; onChange: (v: string[]) => void; disabled?: boolean }) {
+  if (q.type === 'sql') {
+    return <SqlEditor value={value[0] ?? q.sql?.starter ?? ''} onChange={(v) => onChange([v])} disabled={disabled} />;
+  }
   if (q.type === 'fill') {
     return (
       <input
@@ -49,19 +53,6 @@ export function AnswerInput({ q, value, onChange, disabled }: { q: LessonQuestio
   );
 }
 
-/** 第一段：指出錯在哪 */
-function whereWrong(q: LessonQuestion, answer: string[]): string {
-  if (q.type === 'fill') return q.wrongHint ?? '答案不正確，請再檢查一次。';
-  const wrongPick = answer.find((a) => !q.correct.includes(a));
-  if (q.type === 'single') return (wrongPick && q.feedback?.[wrongPick]) || '這個選項不正確，再想想看。';
-  const hit = answer.filter((a) => q.correct.includes(a)).length;
-  const extra = answer.length - hit;
-  const parts = [`你選對了 ${hit} / ${q.correct.length} 個正確選項`];
-  if (extra > 0) parts.push(`另外多選了 ${extra} 個錯誤選項`);
-  const fb = wrongPick && q.feedback?.[wrongPick];
-  return parts.join('，') + '。' + (fb ? `\n例如 (${wrongPick})：${fb}` : '');
-}
-
 export interface PracticeResult {
   correct: boolean;
   hintLevel: 0 | 1 | 2 | 3;
@@ -82,20 +73,30 @@ export function PracticeQuestion({ q, index, onResolved, previous }: { q: Lesson
   const [lastAnswer, setLastAnswer] = useState<string[]>([]);
   const start = useRef(Date.now());
 
-  const ready = q.type === 'fill' ? (answer[0] ?? '').trim() !== '' : answer.length > 0;
+  const [grading, setGrading] = useState(false);
+  const ready = q.type === 'fill' || q.type === 'sql' ? (answer[0] ?? '').trim() !== '' : answer.length > 0;
   const finish = (correct: boolean, hintLevel: 0 | 1 | 2 | 3, ans: string[]) => {
     setState(correct ? 'correct' : 'revealed');
     onResolved({ correct, hintLevel, answer: ans, durationSec: Math.round((Date.now() - start.current) / 1000) });
   };
 
-  const submit = () => {
-    if (!ready) return;
+  const submit = async () => {
+    if (!ready || grading) return;
     setLastAnswer(answer);
-    const g = gradeObjective(q, answer);
+    setGrading(true);
+    let g;
+    try {
+      g = await gradeLessonQuestion(q, answer);
+    } catch (e) {
+      setGrading(false);
+      setStage1(`無法批改：${(e as Error).message}`);
+      return;
+    }
+    setGrading(false);
     if (g.correct) return finish(true, Math.min(wrongTries, 2) as 0 | 1 | 2, answer);
     const n = wrongTries + 1;
     setWrongTries(n);
-    setStage1(whereWrong(q, answer));
+    setStage1(g.where ?? '答案不正確，請再檢查一次。');
     if (n >= 3) finish(false, 3, answer);
   };
 
@@ -104,14 +105,14 @@ export function PracticeQuestion({ q, index, onResolved, previous }: { q: Lesson
     <div className="rounded-xl border border-line p-4">
       <div className="mb-2 flex flex-wrap items-center gap-1.5">
         <Badge tone="muted">練習 {index + 1}</Badge>
-        <Badge tone="muted">{q.type === 'single' ? '單選' : q.type === 'multi' ? '多選' : '填空'}</Badge>
+        <Badge tone="muted">{typeLabel(q)}</Badge>
         <Badge tone="muted">難度 {q.difficulty}</Badge>
         {state === 'correct' && <Badge tone="good"><CheckCircle2 size={12} className="mr-1" />{previous && wrongTries === 0 && !lastAnswer.length ? '已完成' : wrongTries === 0 ? '一次答對' : `第 ${wrongTries + 1} 次答對`}</Badge>}
         {state === 'revealed' && <Badge tone="warn">已看解答</Badge>}
       </div>
       <p className="whitespace-pre-line text-sm leading-relaxed">{q.prompt}</p>
       {q.code && <CodeBlock code={q.code} />}
-      <AnswerInput q={q} value={resolved ? (lastAnswer.length ? lastAnswer : q.correct) : answer} onChange={setAnswer} disabled={resolved} />
+      <AnswerInput q={q} value={resolved ? (lastAnswer.length ? lastAnswer : q.type === 'sql' ? [''] : q.correct) : answer} onChange={setAnswer} disabled={resolved} />
 
       {!resolved && (
         <>
@@ -128,7 +129,7 @@ export function PracticeQuestion({ q, index, onResolved, previous }: { q: Lesson
             </div>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button className="btn btn-primary" disabled={!ready} onClick={submit}>{wrongTries === 0 ? '送出' : '再試一次'}</button>
+            <button className="btn btn-primary" disabled={!ready || grading} onClick={submit}>{grading ? '批改中…' : wrongTries === 0 ? '送出' : '再試一次'}</button>
             <button className="btn btn-ghost" onClick={() => setConfirmReveal(true)}><Eye size={16} />直接看答案</button>
             {wrongTries > 0 && <span className="text-xs text-muted">再答錯 {3 - wrongTries} 次會顯示完整解答</span>}
           </div>
@@ -139,8 +140,9 @@ export function PracticeQuestion({ q, index, onResolved, previous }: { q: Lesson
         <div className={`mt-3 rounded-lg p-3 text-sm ${state === 'correct' ? 'bg-good-soft' : 'bg-surface-2'}`}>
           <div className="mb-1 flex items-center gap-1.5 font-medium">
             {state === 'correct' ? <CheckCircle2 size={16} className="text-good" /> : <XCircle size={16} className="text-warn" />}
-            正確答案：{answerLabel(q, q.correct)}
+            {q.type === 'sql' ? (state === 'correct' ? '答對了！參考寫法：' : '正確答案（參考寫法）：') : <>正確答案：{answerLabel(q, q.correct)}</>}
           </div>
+          {q.type === 'sql' && <pre className="mb-2 overflow-x-auto rounded-lg border border-line bg-surface p-2 text-xs">{q.correct[0]}</pre>}
           <p className="leading-relaxed"><span className="font-medium">為什麼：</span>{q.explanation}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <CopyToAIButton compact label="請 AI 換個方式解釋" build={() => buildQuestionReviewPrompt({ question: q, myAnswerText: answerLabel(q, lastAnswer), correctAnswerText: answerLabel(q, q.correct), wasCorrect: state === 'correct' })} />
@@ -176,4 +178,8 @@ export function PracticeQuestion({ q, index, onResolved, previous }: { q: Lesson
       </Modal>
     </div>
   );
+}
+
+export function typeLabel(q: LessonQuestion): string {
+  return q.type === 'single' ? '單選' : q.type === 'multi' ? '多選' : q.type === 'sql' ? 'SQL 實作' : '填空';
 }

@@ -6,9 +6,12 @@ import { MONTH1B } from './month1b';
 import { MONTH1C } from './month1c';
 import { MONTH1D } from './month1d';
 import { QUIZ_EXTRA } from './quizExtra';
+import { MONTH2A } from './month2a';
+import { MONTH2B } from './month2b';
+import { MONTH2C } from './month2c';
 import { registerModuleLessonCount } from '../../db/repo';
 
-export const LESSONS: Lesson[] = [...MONTH1A, ...MONTH1B, ...MONTH1C, ...MONTH1D].map((l) => ({ ...l, quiz: [...l.quiz, ...(QUIZ_EXTRA[l.id] ?? [])] })).sort((a, b) => {
+export const LESSONS: Lesson[] = [...MONTH1A, ...MONTH1B, ...MONTH1C, ...MONTH1D, ...MONTH2A, ...MONTH2B, ...MONTH2C].map((l) => ({ ...l, quiz: [...l.quiz, ...(QUIZ_EXTRA[l.id] ?? [])] })).sort((a, b) => {
   const ma = Object.keys(MODULE_BY_ID).indexOf(a.moduleId);
   const mb = Object.keys(MODULE_BY_ID).indexOf(b.moduleId);
   return ma - mb || a.topicIndex - b.topicIndex;

@@ -17,6 +17,7 @@ function asNumber(s: string): number | null {
 
 /** 批改客觀題：單選、多選（部分給分）、填空（文字或數值容差 0.01） */
 export function gradeObjective(q: ObjectiveQuestion, answer: string[]): GradeResult {
+  if (q.type === 'sql') return { correct: false, scoreRatio: 0 }; // SQL 題由 sqlGrade 以查詢結果批改
   if (q.type === 'single') {
     const ok = answer.length === 1 && answer[0] === q.correct[0];
     return { correct: ok, scoreRatio: ok ? 1 : 0 };
